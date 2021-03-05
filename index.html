@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <canvas id="canvas" width="600" height="600">
+  </canvas>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const render = () => {
+      ctx.clearRect(0, 0, 600, 600)
+
+      ctx.fillStyle = 'green';
+      ctx.font = '50px serif';
+  
+      state.activeWords.forEach(word => {
+        ctx.fillText(word.word, word.x, word.y)
+        if (word.word.startsWith(state.currentInput)) {
+          ctx.fillStyle = 'red';
+          ctx.fillText(state.currentInput, word.x, word.y);
+          ctx.fillStyle = 'green';
+        }
+      })
+
+      ctx.fillStyle = 'white'
+      ctx.fillText(state.currentInput, 20, 550)
+    }
+
+    var state = {
+      activeWords: [
+        {
+          word: 'hello',
+          x: 60,
+          y: 90
+        },
+        {
+          word: 'zombie',
+          x: 150,
+          y: 240
+        }],
+      currentInput: 'zom',
+    }
+
+    render()
+
+    document.addEventListener('keydown', event => {
+      
+      if (event.key === 'Backspace') {
+        state.currentInput = state.currentInput.slice(0, -1)
+      } else {
+        state.currentInput += event.key
+      }
+      render()
+    })
+  </script>
+</body>
+
+</html>
