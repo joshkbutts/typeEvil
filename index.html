@@ -13,23 +13,30 @@
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 
+    const playerPosition = {x: 250, y: 500};
+
     const render = () => {
-      ctx.clearRect(0, 0, 600, 600)
+      ctx.clearRect(0, 0, 600, 600);
 
       ctx.fillStyle = 'green';
-      ctx.font = '50px serif';
+      ctx.font = '30px serif';
   
+      // render words/zombies
       state.activeWords.forEach(word => {
-        ctx.fillText(word.word, word.x, word.y)
+        ctx.fillText(word.word, word.x, word.y);
         if (word.word.startsWith(state.currentInput)) {
           ctx.fillStyle = 'red';
           ctx.fillText(state.currentInput, word.x, word.y);
           ctx.fillStyle = 'green';
         }
-      })
+      });
 
-      ctx.fillStyle = 'white'
-      ctx.fillText(state.currentInput, 20, 550)
+      // render current input
+      ctx.fillStyle = 'white';
+      ctx.fillText(state.currentInput, 20, 550);
+
+      // render player
+      ctx.fillRect(playerPosition.x, playerPosition.y, 20, 20);
     }
 
     var state = {
@@ -43,21 +50,47 @@
           word: 'zombie',
           x: 150,
           y: 240
+        },
+        {
+          word: 'evil',
+          x: 500,
+          y: 20
         }],
       currentInput: 'zom',
     }
 
-    render()
-
     document.addEventListener('keydown', event => {
-      
       if (event.key === 'Backspace') {
-        state.currentInput = state.currentInput.slice(0, -1)
-      } else {
-        state.currentInput += event.key
+        state.currentInput = state.currentInput.slice(0, -1);
+        event.preventDefault();
+        return false;
+      } else if (event.key === 'Tab' || event.key === '/') {
+        event.preventDefault();
+        return false;
+      } else if (event.key.length > 1) {
+        return false;
       }
-      render()
-    })
+       else {
+        state.currentInput += event.key;
+      }
+    });
+
+    function animate(timestamp) {
+      window.requestAnimationFrame(animate)
+
+      state.activeWords.forEach(word => {
+        // move zombie near player.
+        let xDist = playerPosition.x - word.x;
+        let yDist = playerPosition.y - word.y;
+        let vectorDistance = Math.sqrt(xDist**2 + yDist**2);
+        word.x += (xDist / vectorDistance);
+        word.y += (yDist / vectorDistance);
+      });
+
+      render();
+    }
+
+    window.requestAnimationFrame(animate);
   </script>
 </body>
 
