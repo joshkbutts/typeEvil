@@ -25,6 +25,7 @@
       state.activeWords.forEach(word => {
         ctx.fillText(word.word, word.x, word.y);
         if (word.word.startsWith(state.currentInput)) {
+          state.selectedWord = word
           ctx.fillStyle = 'red';
           ctx.fillText(state.currentInput, word.x, word.y);
           ctx.fillStyle = 'green';
@@ -56,7 +57,8 @@
           x: 500,
           y: 20
         }],
-      currentInput: 'zom',
+      selectedWord: undefined,
+      currentInput: '',
     }
 
     document.addEventListener('keydown', event => {
@@ -73,8 +75,15 @@
        else {
         state.currentInput += event.key;
       }
-    });
 
+      if (state.currentInput === state.selectedWord.word) {
+        state.activeWords.splice(state.activeWords.indexOf(state.selectedWord), 1)
+        state.currentInput = ''
+      }
+      
+      render()
+    });
+    
     function animate(timestamp) {
       window.requestAnimationFrame(animate)
 
