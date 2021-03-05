@@ -59,14 +59,18 @@
       currentInput: 'zom',
     }
 
-    render();
-
     document.addEventListener('keydown', event => {
       if (event.key === 'Backspace') {
         state.currentInput = state.currentInput.slice(0, -1);
         event.preventDefault();
         return false;
-      } else {
+      } else if (event.key === 'Tab' || event.key === '/') {
+        event.preventDefault();
+        return false;
+      } else if (event.key.length > 1) {
+        return false;
+      }
+       else {
         state.currentInput += event.key;
       }
     });
