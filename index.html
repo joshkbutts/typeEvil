@@ -103,16 +103,21 @@
       render()
     });
 
+    var lastTime = performance.now();
     function animate(timestamp) {
       window.requestAnimationFrame(animate)
+
+      let timeDifference = timestamp - lastTime;
+      let timeModifier = (timeDifference / 8)
+      lastTime = timestamp;
 
       state.activeWords.forEach(word => {
         // move zombie near player.
         let xDist = playerPosition.x - word.x;
         let yDist = playerPosition.y - word.y;
-        let vectorDistance = Math.sqrt(xDist ** 2 + yDist ** 2);
-        word.x += (xDist / vectorDistance);
-        word.y += (yDist / vectorDistance);
+        let vectorDistance = Math.sqrt(xDist**2 + yDist**2);
+        word.x += (xDist / vectorDistance) * 0.5 * timeModifier;
+        word.y += (yDist / vectorDistance) * 0.5 * timeModifier;
       });
 
       render();
