@@ -13,14 +13,14 @@
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 
-    const playerPosition = {x: 250, y: 500};
+    const playerPosition = { x: 250, y: 500 };
 
     const render = () => {
       ctx.clearRect(0, 0, 600, 600);
 
       ctx.fillStyle = 'green';
       ctx.font = '30px serif';
-  
+
       // render words/zombies
       state.activeWords.forEach(word => {
         ctx.fillText(word.word, word.x, word.y);
@@ -36,30 +36,43 @@
       ctx.fillStyle = 'white';
       ctx.fillText(state.currentInput, 20, 550);
 
+      // render score
+      ctx.fillStyle = 'white';
+      ctx.fillText(state.score, 450, 550)
+
       // render player
       ctx.fillRect(playerPosition.x, playerPosition.y, 20, 20);
     }
 
+    const allWords = [
+      { word: 'hello' },
+      { word: 'zombie' },
+      { word: 'evil' },
+      { word: 'resident' },
+      { word: 'typing' }
+    ]
+
+    let randomCoord = () => {
+      return Math.floor(Math.random() * 400) + 1
+    }
+
+    const spawnWords = () => {
+      for (let i = 0; i < state.level; i++) {
+        allWords[i].x = randomCoord()
+        allWords[i].y = randomCoord()
+        state.activeWords.push(allWords[i])
+      }
+    }
+
     var state = {
-      activeWords: [
-        {
-          word: 'hello',
-          x: 60,
-          y: 90
-        },
-        {
-          word: 'zombie',
-          x: 150,
-          y: 240
-        },
-        {
-          word: 'evil',
-          x: 500,
-          y: 20
-        }],
+      activeWords: [],
       selectedWord: undefined,
       currentInput: '',
+      score: 0,
+      level: 1
     }
+
+    spawnWords()
 
     document.addEventListener('keydown', event => {
       if (event.key === 'Backspace') {
@@ -72,18 +85,24 @@
       } else if (event.key.length > 1) {
         return false;
       }
-       else {
+      else {
         state.currentInput += event.key;
       }
 
       if (state.currentInput === state.selectedWord.word) {
         state.activeWords.splice(state.activeWords.indexOf(state.selectedWord), 1)
         state.currentInput = ''
+        state.score++
       }
-      
+
+      if (state.activeWords.length === 0) {
+        state.level++
+        spawnWords()
+      }
+
       render()
     });
-    
+
     function animate(timestamp) {
       window.requestAnimationFrame(animate)
 
@@ -91,7 +110,7 @@
         // move zombie near player.
         let xDist = playerPosition.x - word.x;
         let yDist = playerPosition.y - word.y;
-        let vectorDistance = Math.sqrt(xDist**2 + yDist**2);
+        let vectorDistance = Math.sqrt(xDist ** 2 + yDist ** 2);
         word.x += (xDist / vectorDistance);
         word.y += (yDist / vectorDistance);
       });
