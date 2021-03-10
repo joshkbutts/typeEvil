@@ -1,3 +1,7 @@
 #canvas {
   background-color: black;
 }
+
+#game-content {
+  display: none;
+}
