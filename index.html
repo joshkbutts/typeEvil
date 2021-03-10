@@ -6,8 +6,15 @@
 </head>
 
 <body>
-  <canvas id="canvas" width="600" height="600">
-  </canvas>
+  <div id="landing">
+    Welcome to Type Evil. (Landing page stuff here).
+    <button id="start-btn">Load Game</button>
+  </div>
+  <div id="game-content">
+    <canvas id="canvas" width="600" height="600">
+    </canvas>
+    <audio id="menu-music" loop="true" src="typeEvil_menu.m4a"></audio>
+  </div>
 
   <script>
     const canvas = document.getElementById('canvas');
@@ -44,7 +51,8 @@
         ctx.font = '52px serif';
         ctx.fillText("Type Evil", 50, 200);
         ctx.font = '32px serif';
-        ctx.fillText("Press any key to start", 50, 250);
+        ctx.fillText("Type to survive", 50, 250);
+        ctx.fillText("Press any key to start", 50, 280);
       }
     }
 
@@ -74,7 +82,8 @@
       currentInput: '',
       score: 0,
       level: 1,
-      gameStarted: false
+      gameStarted: false,
+      lastTime: undefined
     }
 
     spawnWords()
@@ -82,6 +91,7 @@
     document.addEventListener('keydown', event => {
       if (!state.gameStarted) {
         state.gameStarted = true;
+        document.getElementById('menu-music').pause();
         return;
       }
 
@@ -114,14 +124,15 @@
     });
 
     var lastTime = performance.now();
+    
     function animate(timestamp) {
       window.requestAnimationFrame(animate)
 
-      if (state.gameStarted) {
-        let timeDifference = timestamp - lastTime;
-        let timeModifier = (timeDifference/8)
-        lastTime = timestamp;
+      let timeDifference = timestamp - state.lastTime;
+      let timeModifier = (timeDifference/8)
+      state.lastTime = timestamp;
 
+      if (state.gameStarted) {
         state.activeWords.forEach(word => {
           // move zombie near player.
           let xDist = playerPosition.x - word.x;
@@ -135,7 +146,16 @@
       render();
     }
 
-    window.requestAnimationFrame(animate);
+    function startGame() {
+      document.getElementById('landing').style.display = 'none';
+      document.getElementById('game-content').style.display = 'block';
+      document.getElementById('menu-music').play();
+
+      state.lastTime = performance.now();
+      window.requestAnimationFrame(animate);
+    }
+
+    document.getElementById('start-btn').addEventListener('click', startGame);
   </script>
 </body>
 
