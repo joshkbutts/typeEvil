@@ -7,20 +7,31 @@
 
 <body>
   <div id="landing">
-    Welcome to Type Evil. (Landing page stuff here).
+    Welcome to type:Evil. (Landing page stuff here).
     <button id="start-btn">Load Game</button>
   </div>
   <div id="game-content">
     <canvas id="canvas" width="600" height="600">
     </canvas>
-    <audio id="menu-music" loop="true" src="typeEvil_menu.m4a"></audio>
+    <audio id="menu-music" loop="true" src="audio/typeEvil_menu.m4a"></audio>
+    <audio id="game-music" loop="true" src="audio/zombierush.m4a"></audio>
+    <audio id="gunshot" src="audio/gunshot.m4a"></audio>
   </div>
 
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 
-    const playerPosition = { x: 250, y: 500 };
+    const playerPosition = { x: 250, y: 450 };
+
+    var background = new Image();
+    background.src = "stages/hallway1.png";
+
+    var zombie = new Image();
+    zombie.src = "sprites/zombie_grab.png";
+
+    var character = new Image;
+    character.src = "sprites/character.png";
 
     const render = () => {
       ctx.clearRect(0, 0, 600, 600);
@@ -28,10 +39,12 @@
       if (state.gameStarted) {
         ctx.fillStyle = 'green';
         ctx.font = '30px serif';
-    
+        ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+
         // render words/zombies
         state.activeWords.forEach(word => {
           ctx.fillText(word.word, word.x, word.y);
+          ctx.drawImage(zombie, word.x, word.y, 80, 130);
           if (word.word.startsWith(state.currentInput)) {
             state.selectedWord = word
             ctx.fillStyle = 'red';
@@ -45,11 +58,12 @@
         ctx.fillText(state.currentInput, 20, 550);
 
         // render player
-        ctx.fillRect(playerPosition.x, playerPosition.y, 20, 20);
+        // ctx.fillRect(playerPosition.x, playerPosition.y, 20, 20);
+        ctx.drawImage(character, playerPosition.x, playerPosition.y, 60, 140);
       } else {
         ctx.fillStyle = 'white';
         ctx.font = '52px serif';
-        ctx.fillText("Type Evil", 50, 200);
+        ctx.fillText("type:Evil", 50, 200);
         ctx.font = '32px serif';
         ctx.fillText("Type to survive", 50, 250);
         ctx.fillText("Press any key to start", 50, 280);
@@ -92,6 +106,7 @@
       if (!state.gameStarted) {
         state.gameStarted = true;
         document.getElementById('menu-music').pause();
+        document.getElementById('game-music').play();
         return;
       }
 
@@ -107,6 +122,7 @@
       }
       else {
         state.currentInput += event.key;
+        document.getElementById('gunshot').play();
       }
 
       if (state.currentInput === state.selectedWord.word) {
@@ -124,12 +140,12 @@
     });
 
     var lastTime = performance.now();
-    
+
     function animate(timestamp) {
       window.requestAnimationFrame(animate)
 
       let timeDifference = timestamp - state.lastTime;
-      let timeModifier = (timeDifference/8)
+      let timeModifier = (timeDifference / 8)
       state.lastTime = timestamp;
 
       if (state.gameStarted) {
@@ -137,7 +153,7 @@
           // move zombie near player.
           let xDist = playerPosition.x - word.x;
           let yDist = playerPosition.y - word.y;
-          let vectorDistance = Math.sqrt(xDist**2 + yDist**2);
+          let vectorDistance = Math.sqrt(xDist ** 2 + yDist ** 2);
           word.x += (xDist / vectorDistance) * 0.5 * timeModifier;
           word.y += (yDist / vectorDistance) * 0.5 * timeModifier;
         });
