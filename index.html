@@ -53,9 +53,22 @@
           }
         });
 
+        // render negative health bar
+        ctx.beginPath();
+        ctx.rect(20, 480, 100, 20);
+        ctx.fillStyle = 'red'
+        ctx.fill();
+
+        // render health bar
+        ctx.beginPath();
+        ctx.rect(20, 480, state.health, 20);
+        ctx.fillStyle = 'green'
+        ctx.fill();
+
         // render current input
         ctx.fillStyle = 'white';
         ctx.fillText(state.currentInput, 20, 550);
+        ctx.fillText(state.score, 20, 580);
 
         // render player
         // ctx.fillRect(playerPosition.x, playerPosition.y, 20, 20);
@@ -78,15 +91,34 @@
       { word: 'typing' }
     ]
 
-    let randomCoord = () => {
-      return Math.floor(Math.random() * 400) + 1
+    function randomNumber(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    let randomX = () => {
+      return randomNumber(1, 550)
+    }
+
+    let randomY = () => {
+      return randomNumber(1, 50)
     }
 
     const spawnWords = () => {
-      for (let i = 0; i < state.level; i++) {
-        allWords[i].x = randomCoord()
-        allWords[i].y = randomCoord()
-        state.activeWords.push(allWords[i])
+      for (let i = 0; i < state.zombieCount; i++) {
+        if (i === 0) {
+          allWords[i].x = randomX()
+          allWords[i].y = randomY()
+          state.activeWords.push(allWords[i])
+        } else {
+          // need to create logic here that separates zombies from not stacking on top of eachother 
+
+          // not sure if this is the place but there also needs to be logic that when 
+          // ALL OF THE ZOMBIES ARE STACKED ON TOP OF PLAYER THE WORDS ARE SEPARATED SO YOU CAN READ THEM
+
+          allWords[i].x = randomX()
+          allWords[i].y = randomY()
+          state.activeWords.push(allWords[i])
+        }
       }
     }
 
@@ -96,8 +128,13 @@
       currentInput: '',
       score: 0,
       level: 1,
+      zombieCount: 1,
       gameStarted: false,
-      lastTime: undefined
+      lastTime: undefined,
+      health: 100,
+      isInvincible: false,
+      timeOfBite: 0,
+      stageTransition: 600,
     }
 
     spawnWords()
@@ -133,7 +170,21 @@
 
       if (state.activeWords.length === 0) {
         state.level++
+        state.zombieCount++
         spawnWords()
+      }
+
+      if (state.level === 5) {
+
+        // attempting to create logic here that does the straight up
+        // star wars transition between levels
+
+        ctx.beginPath();
+        ctx.rect(600, 600, state.stageTransition, 600)
+        ctx.fillStyle = 'black'
+        ctx.fill();
+        background.src = "stages/hallway2.png";
+        state.zombieCount = 1
       }
 
       render()
@@ -145,7 +196,7 @@
       window.requestAnimationFrame(animate)
 
       let timeDifference = timestamp - state.lastTime;
-      let timeModifier = (timeDifference / 8)
+      let timeModifier = (timeDifference / 20)
       state.lastTime = timestamp;
 
       if (state.gameStarted) {
@@ -156,6 +207,20 @@
           let vectorDistance = Math.sqrt(xDist ** 2 + yDist ** 2);
           word.x += (xDist / vectorDistance) * 0.5 * timeModifier;
           word.y += (yDist / vectorDistance) * 0.5 * timeModifier;
+
+          // Zombie Attacking Player Logic
+          if (word.x >= playerPosition.x - 20 && word.y >= playerPosition.y - 20) {
+            if (!state.isInvincible) {
+              state.isInvincible = true
+              state.health -= 10;
+              state.timeOfBite = setInterval(function () {
+                state.isInvincible = false;
+              }, 5000)
+            }
+            if (state.health <= 0) {
+              alert('YOU ARE DEAD...')
+            }
+          }
         });
       }
 
