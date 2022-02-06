@@ -6,11 +6,22 @@ const playerPosition = { x: 250, y: 450 };
 var background = new Image();
 background.src = "stages/hallway1.png";
 
-var zombie = new Image();
-zombie.src = "sprites/zombie_grab.png";
+var zombieBasic = new Image();
+zombieBasic.src = "sprites/zombie_grab.png";
 
-var character = new Image;
+var zombieCop = new Image();
+zombieCop.src = "sprites/zombie_cop.png";
+
+var zombieGirl = new Image();
+zombieGirl.src = "sprites/zombie_girl.png"
+
+var character = new Image();
 character.src = "sprites/character.png";
+
+var hitConfirm = new Image();
+hitConfirm.src = "sprites/hit-confirm-sprite-sheet.png"
+
+const zombieArray = [zombieBasic, zombieCop, zombieGirl]
 
 const render = () => {
   ctx.clearRect(0, 0, 600, 600);
@@ -23,7 +34,8 @@ const render = () => {
     // render words/zombies
     state.activeWords.forEach(word => {
       ctx.fillText(word.word, word.x, word.y);
-      ctx.drawImage(zombie, word.x, word.y, 80, 130);
+      ctx.drawImage(zombieArray[1], word.x, word.y, 80, 130);
+      // ctx.drawImage(zombieArray[Math.floor(Math.random() * 2)], word.x, word.y, 80, 130);
       if (word.word.startsWith(state.currentInput)) {
         state.selectedWord = word
         ctx.fillStyle = 'red';
@@ -139,6 +151,7 @@ document.addEventListener('keydown', event => {
   else {
     state.currentInput += event.key;
     document.getElementById('gunshot').play();
+    hitConfirmAnimation();
   }
 
   if (state.currentInput === state.selectedWord.word) {
@@ -170,6 +183,42 @@ document.addEventListener('keydown', event => {
 });
 
 var lastTime = performance.now();
+
+// hit confirm animation 
+
+function hitConfirmAnimation() {
+  // Define the number of columns and rows in the sprite
+  let numColumns = 6;
+  let numRows = 1;
+
+  // Define the size of a frame
+  let frameWidth = hitConfirm.width / numColumns;;
+  let frameHeight = hitConfirm.height / numRows;;
+
+  // The sprite image frame starts from 0
+  let currentFrame = 0;
+
+  setInterval(function () {
+    // Pick a new frame
+    currentFrame++;
+
+    // Make the frames loop
+    let maxFrame = numColumns * numRows - 1;
+    if (currentFrame > maxFrame) {
+      currentFrame = 0;
+    }
+
+    // Update rows and columns
+    let column = currentFrame % numColumns;
+    let row = Math.floor(currentFrame / numColumns);
+
+    // Clear and draw
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(hitConfirm, column * frameWidth, row * frameHeight, frameWidth, frameHeight, 10, 30);
+
+    //Wait for next step in the loop
+  }, 100);
+}
 
 function animate(timestamp) {
   window.requestAnimationFrame(animate)
